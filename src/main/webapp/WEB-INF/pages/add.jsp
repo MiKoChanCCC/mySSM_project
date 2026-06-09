@@ -24,6 +24,9 @@
 <body>
 <div class="container">
     <h2>新增商品</h2>
+    <% if (request.getAttribute("errorMsg") != null) { %>
+        <p style="color:#F56C6C;text-align:center;margin-bottom:15px;font-size:14px">${errorMsg}</p>
+    <% } %>
     <form action="${pageContext.request.contextPath}/product/add" method="post">
         <div class="form-group">
             <label>商品名称：</label>
@@ -43,7 +46,8 @@
         </div>
         <div class="form-group">
             <label>上架时间：</label>
-            <input type="datetime-local" name="createTime" required/>
+            <input type="datetime-local" id="createTime" name="createTime" required/>
+            <span id="timeError" style="color:#F56C6C;font-size:12px;display:none">上架时间不能晚于当前时间</span>
         </div>
         <div class="btn-row">
             <button type="submit" class="btn btn-primary">提 交</button>
@@ -51,5 +55,34 @@
         </div>
     </form>
 </div>
+<script>
+    var timeInput = document.getElementById('createTime');
+    var timeError = document.getElementById('timeError');
+
+    function setMaxTime() {
+        var now = new Date();
+        var offset = now.getTimezoneOffset() * 60000;
+        var local = new Date(now - offset);
+        timeInput.max = local.toISOString().slice(0, 16);
+    }
+    setMaxTime();
+
+    timeInput.addEventListener('change', function () {
+        if (this.value && new Date(this.value) > new Date()) {
+            timeError.style.display = 'inline';
+            this.value = '';
+        } else {
+            timeError.style.display = 'none';
+        }
+    });
+
+    document.querySelector('form').addEventListener('submit', function (e) {
+        if (timeInput.value && new Date(timeInput.value) > new Date()) {
+            e.preventDefault();
+            timeError.style.display = 'inline';
+            timeInput.value = '';
+        }
+    });
+</script>
 </body>
 </html>
